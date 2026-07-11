@@ -1,34 +1,31 @@
-# StudentSphere 3D Immersive Platform - Full Product + Design + Development Prompt
+--
 
-Build a futuristic full-stack web application called **StudentSphere**.
-This is not a normal school dashboard. The entire experience should feel like entering a digital student universe powered by cinematic UI, floating interfaces, smooth transitions, depth, glowing interactions, and immersive 3D environments.
+Build a premium, modern full-stack web application called the **IPS Academy Student Portal**.
+This is not a generic ERP system. The entire experience should feel like an official, next-generation portal for the **Institute of Engineering & Science (IES)**, powered by a clean UI, smooth transitions, and an intuitive, role-based workflow.
 
 The UI must NOT look like:
 
 * generic dashboard templates
 * common AI-generated admin panels
-* plain glassmorphism clones
 * boring school ERP systems
 * flat card-based layouts
+* flashy, unprofessional designs
 
 The design language should feel like:
 
-* a futuristic student metaverse
-* interactive holographic operating system
-* floating layered UI with depth
-* animated 3D environments
-* smooth cinematic motion
-* premium gaming dashboard aesthetics
-* sci-fi but minimal and clean
+* a next-generation official IPS Academy portal
+* an intuitive and clean academic operating system
+* a professional and elegant user experience
+* modern, but grounded in real-world workflows
+* premium and well-crafted
+* focused on clarity and ease-of-use
 
 The interface should have:
 
-* 3D depth everywhere
+* depth and layering
 * floating panels
-* animated particles
-* glowing edges
-* hover physics
-* dynamic lighting
+* subtle hover physics
+* clean, dynamic lighting
 * smooth transitions
 * animated page entry/exit
 * interactive motion effects
@@ -36,10 +33,8 @@ The interface should have:
 * soft shadows
 * parallax layers
 * liquid movement
-* magnetic buttons
 * smooth cursor interactions
 * animated charts
-* ambient background animations
 
 The website should feel alive.
 
@@ -52,14 +47,13 @@ Frontend:
 * Next.js / React
 * TypeScript
 * Tailwind CSS
-* Framer Motion
-* Three.js / React Three Fiber
-* GSAP for cinematic animations
+* Framer Motion for animations
 * Zustand or Context API for state management
 
 Backend:
 
 * Node.js + Express OR Next.js API routes
+* PostgreSQL / MongoDB
 * MongoDB / PostgreSQL
 * JWT Authentication
 * Socket.io for real-time chat
@@ -78,14 +72,12 @@ Other:
 
 Theme:
 
-* Dark futuristic UI
-* Neon accents
-* Soft glowing borders
-* Floating holographic panels
-* 3D card depth
-* Space-inspired gradients
-* Animated particles in background
-* Glass + metallic hybrid textures
+* Clean, professional UI (light or dark theme)
+* IPS Academy brand colors
+* Soft, subtle borders
+* Floating panels with depth
+* Minimal and focused design
+* Professional typography
 
 Suggested colors:
 
@@ -98,15 +90,15 @@ Suggested colors:
 
 Typography:
 
-* Futuristic clean fonts
-* Large cinematic headings
+* Clean, modern sans-serif fonts (e.g., Inter, Poppins)
+* Clear, hierarchical headings
 * Smooth transitions between sections
 
 ---
 
 # Landing Experience
 
-The homepage should feel like entering a futuristic academy control system.
+The homepage should feel like an official and secure login portal for IPS Academy.
 
 Include:
 
@@ -120,14 +112,14 @@ Include:
 
 Hero section:
 
-* immersive 3D environment
-* glowing title
+* Clean, professional branding
+* Clear title: "IPS Academy Student Portal"
 * animated tagline
 * floating UI elements
-* holographic buttons
+* Intuitive login form
 
 Possible tagline:
-"Where Students Become Legends."
+"Institute of Engineering & Science - Academic Management System"
 
 ---
 
@@ -136,7 +128,9 @@ Possible tagline:
 ## User Types
 
 1. Admin
-2. Student
+2. Coordinator
+3. Faculty
+4. Student
 
 ---
 
@@ -145,13 +139,21 @@ Possible tagline:
 ### Admin Login
 
 * Secure password login
-* Animated admin portal interface
+* Access to the main administrative dashboard
 * Full system access
+
+### Coordinator Login
+* Login using official email + password
+* Access to a dashboard focused on their assigned section(s)
+
+### Faculty Login
+* Login using official email + password
+* Access to a dashboard for managing attendance, assignments, and lectures
 
 ### Student Login
 
-* Login using student ID + password
-* Personalized animated dashboard
+* Login using Enrollment No. / Computer Code + password
+* Personalized dashboard with academic overview
 
 ### Session Management
 
@@ -163,9 +165,9 @@ Possible tagline:
 
 If unauthorized access occurs:
 
-* cinematic warning animation
+* clear warning message
 * redirect to login
-* animated “Access Denied” interface
+* clean "Access Denied" interface
 
 ---
 
@@ -176,13 +178,12 @@ After login, admin enters a futuristic command center dashboard.
 ## Dashboard Features
 
 * total students count
-* animated statistics
-* floating metric cubes
+* key statistics (faculty, departments, etc.)
 * live activity panel
 * navigation hub
-* leaderboard preview
+* timetable preview
 * recent notices
-* top performers
+* student performance summaries
 
 ## Dashboard Design
 
@@ -195,10 +196,9 @@ The dashboard should look like:
 
 Add:
 
-* animated counters
+* animated statistical counters
 * hover expansion effects
-* glowing graph lines
-* floating navigation orbs
+* clean graph lines
 
 ---
 
@@ -208,11 +208,11 @@ Add:
 
 Admin can:
 
-* view all students
-* search students by name
-* add new students
-* edit student details
-* delete students
+* view all students, faculty, and coordinators
+* search by name, computer code, or enrollment number
+* add new users
+* edit user details
+* delete users
 * upload profile pictures
 
 ---
@@ -221,10 +221,9 @@ Admin can:
 
 Instead of plain tables:
 
-* use animated floating profile cards
-* 3D tilt interaction
-* glowing hover effects
-* profile hologram feel
+* use clean, modern profile cards
+* subtle tilt interaction on hover
+* soft hover effects
 
 Each card shows:
 
@@ -240,9 +239,8 @@ Each card shows:
 
 Form should feel futuristic:
 
-* animated input fields
+* clean input fields with smooth animations
 * floating labels
-* glowing borders
 * smooth transitions
 * drag-and-drop image upload
 
@@ -250,11 +248,12 @@ Fields:
 
 * name
 * DOB
-* class
+* branch / section
 * description
 * achievements
-* scores
-* student ID
+* internal marks
+* Computer Code
+* Enrollment Number
 * password
 * profile image
 
@@ -267,10 +266,12 @@ This should feel like a futuristic character profile from a game.
 ## Profile Includes
 
 * name
+* Computer Code / Enrollment Number
 * DOB
 * age
-* class
+* branch / section
 * achievements
+* projects / certifications
 * description
 * profile image
 
@@ -278,14 +279,11 @@ This should feel like a futuristic character profile from a game.
 
 ## Score System
 
-Display scores in:
+Display academic metrics:
 
-* Academic
-* Social
-* Physical
-* Looks
-* Communication
-* Skills
+* GPA / CGPA
+* Internal Marks
+* Attendance Percentage
 
 ---
 
@@ -294,9 +292,9 @@ Display scores in:
 The radar chart should:
 
 * animate while loading
-* glow dynamically
+* use brand colors
 * react to hover
-* feel holographic
+* feel clean and informative
 
 Add:
 
@@ -311,9 +309,8 @@ Add:
 Features:
 
 * floating layered sections
-* cinematic transitions
+* smooth transitions
 * animated achievement badges
-* profile energy aura
 * smooth scroll effects
 
 Student can only view:
@@ -331,25 +328,18 @@ Admin can:
 ## Features
 
 * ranks students by points
-* highest to lowest
+* ranks students by GPA/CGPA
 * visible to all users
 
 ---
 
 ## Design
 
-Leaderboard should look like:
-
-* futuristic arena rankings
-* glowing podiums
-* animated rank transitions
-* floating score numbers
+Leaderboard should look like a professional academic ranking board.
 
 Top 3 students:
 
-* extra visual emphasis
-* holographic crowns
-* animated energy rings
+* extra visual emphasis (e.g., gold, silver, bronze accents)
 
 Add:
 
@@ -360,26 +350,23 @@ Add:
 
 # Star Board
 
-A premium showcase area for top 7 students.
+A showcase area for top-performing students (e.g., "Dean's List" or "Toppers").
 
 ## Features
 
 * displays highest-ranked students
-* cinematic spotlight animation
-* animated profile showcase
+* clean spotlight animation
+* professional profile showcase
 
 Design should feel like:
 
 * hall of fame
-* elite academy chamber
-* digital trophy gallery
+* official recognition board
 
 Add:
 
-* rotating 3D cards
-* animated spotlight beams
-* glowing stars
-* floating particles
+* clean, modern cards
+* subtle spotlight effects
 
 ---
 
@@ -390,7 +377,7 @@ Add:
 * real-time messaging
 * Socket.io integration
 * multiple rooms
-* rank-based access
+* section-based or role-based access
 * general chat room
 
 ---
@@ -399,7 +386,7 @@ Add:
 
 Students:
 
-* only access rooms matching their rank
+* only access their section's room
 * plus general room
 
 Admin:
@@ -412,18 +399,14 @@ Admin:
 
 The chat should NOT look like WhatsApp or Discord clone.
 
-Design it like:
-
-* holographic communication terminal
-* floating message streams
-* futuristic communication hub
+Design it like a professional, integrated communication tool.
 
 Features:
 
 * animated message bubbles
 * typing indicators
 * smooth message entry
-* glowing timestamps
+* clean timestamps
 * animated room switching
 
 Each message shows:
@@ -439,7 +422,7 @@ Each message shows:
 
 Admin can:
 
-* create notices
+* create and target notices (by institute, department, branch, section)
 * delete notices
 * clear all notices
 
@@ -453,14 +436,13 @@ Users:
 
 The notice board should feel like:
 
-* floating digital announcement wall
-* futuristic bulletin chamber
+* a clean, digital announcement wall
 
 Features:
 
 * animated cards
 * newest notices first
-* glowing importance markers
+* clear importance markers (e.g., color-coded)
 * smooth transitions
 
 ---
@@ -481,9 +463,8 @@ Features:
 Add:
 
 * drag-and-drop zone
-* floating upload animation
+* clean upload animation
 * live preview
-* image glow effects
 * upload progress animation
 
 ---
@@ -510,7 +491,7 @@ Example:
 
 Full access:
 
-* add/edit/delete students
+* manage institutes, departments, faculty, coordinators, students
 * notices
 * all chat rooms
 * profiles
@@ -524,7 +505,7 @@ Limited access:
 
 * own profile only
 * leaderboard
-* star board
+* toppers list
 * notices
 * rank-specific chat
 
@@ -534,8 +515,8 @@ Limited access:
 
 If restricted route accessed:
 
-* animated warning screen
-* glitch transition
+* clean warning screen
+* smooth transition
 * redirect to login
 
 ---
@@ -549,16 +530,11 @@ Must include:
 * page transitions
 * hover physics
 * smooth scroll animations
-* cinematic loading screens
+* clean loading screens
 * floating movement
-* animated backgrounds
 * interactive cursor
-* 3D depth movement
-* particle systems
-* glowing transitions
-* soft motion blur feeling
+* subtle 3D depth
 * layered parallax
-* dynamic shadows
 
 Every interaction should feel premium.
 
@@ -566,22 +542,16 @@ Every interaction should feel premium.
 
 # 3D Environment Ideas
 
-Use React Three Fiber for:
+Subtle 3D effects can be used for:
 
-* floating geometry
-* rotating spheres
-* particle universes
-* holographic environments
-* dynamic lighting
-* futuristic landscapes
+* background elements
+* interactive data visualizations
+* page transitions
 
 Possible effects:
 
-* orbital motion
-* neon grids
-* floating icons
-* animated stars
-* ambient movement
+* subtle geometric motion
+* clean background grids
 
 ---
 
@@ -590,8 +560,8 @@ Possible effects:
 Optional immersive sounds:
 
 * hover sounds
-* soft UI clicks
-* ambient futuristic hum
+* subtle UI clicks
+* notification sounds
 * notification pulse
 
 Must remain subtle and premium.
@@ -623,14 +593,13 @@ The application must:
 
 # Final Goal
 
-StudentSphere should feel less like a school management system and more like:
+The IPS Academy Student Portal should feel less like a generic ERP and more like:
 
-* a futuristic digital academy
-* a cinematic student universe
-* a gamified intelligence hub
-* an immersive next-generation student platform
+* a modern, official platform for the Institute of Engineering & Science
+* an intuitive and powerful academic tool
+* a system that understands and streamlines the real-world workflows of the college
 
 The final product should make users feel:
-"I’m entering a futuristic student realm, not opening a boring dashboard."
+"I'm using a professional, modern tool built specifically for my college."
 
-Every screen should feel handcrafted, animated, immersive, and visually unforgettable.
+Every screen should feel handcrafted, intuitive, and visually polished.

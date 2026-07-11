@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogIn, Eye, EyeOff, UserCheck, ShieldCheck, GraduationCap } from 'lucide-react';
+import { LogIn, Eye, EyeOff, UserCheck, ShieldCheck, GraduationCap, UserCog } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const roleInfo = [
@@ -8,28 +8,37 @@ const roleInfo = [
     role: 'admin',
     icon: ShieldCheck,
     label: 'Administrator',
-    desc: 'Full system access — manage teachers & students',
+    desc: 'Full system access — manage institutes, faculty, etc.',
     color: 'bg-accent-navy/10 text-accent-navy',
     ring: 'ring-accent-navy',
-    example: 'admin@studentsphere.edu',
+    example: 'principal.ies@ipsacademy.org',
+  },
+  {
+    role: 'coordinator',
+    icon: UserCog,
+    label: 'Coordinator',
+    desc: 'Manage assigned sections and student performance',
+    color: 'bg-accent-slate/10 text-accent-slate',
+    ring: 'ring-accent-slate',
+    example: 'manish.pande.ies@ipsacademy.org',
   },
   {
     role: 'teacher',
     icon: UserCheck,
-    label: 'Teacher',
-    desc: 'Manage assigned students, view analytics',
+    label: 'Faculty',
+    desc: 'Manage lectures, attendance, and assignments',
     color: 'bg-accent-teal/10 text-accent-teal',
     ring: 'ring-accent-teal',
-    example: 'j.mitchell@studentsphere.edu',
+    example: 'namrata.patel.ies@ipsacademy.org',
   },
   {
     role: 'student',
     icon: GraduationCap,
     label: 'Student',
-    desc: 'View your profile, results, assignments',
+    desc: 'View your profile, timetable, and results',
     color: 'bg-accent-orange/10 text-accent-orange',
     ring: 'ring-accent-orange',
-    example: 'a.mercer@studentsphere.edu',
+    example: '0808DS241122.ies@ipsacademy.org',
   },
 ];
 
@@ -58,13 +67,16 @@ export default function LoginPage() {
 
   const fillCredentials = (role: string) => {
     if (role === 'admin') {
-      setEmail('admin@studentsphere.edu');
+      setEmail('principal.ies@ipsacademy.org');
       setPassword('admin123');
+    } else if (role === 'coordinator') {
+      setEmail('manish.pande.ies@ipsacademy.org');
+      setPassword('coordinator123');
     } else if (role === 'teacher') {
-      setEmail('j.mitchell@studentsphere.edu');
+      setEmail('namrata.patel.ies@ipsacademy.org');
       setPassword('teacher123');
     } else {
-      setEmail('a.mercer@studentsphere.edu');
+      setEmail('0808DS241122.ies@ipsacademy.org');
       setPassword('student123');
     }
     setSelectedRole(role);
@@ -81,7 +93,7 @@ export default function LoginPage() {
         <div className="w-9 h-9 rounded-lg bg-off-black flex items-center justify-center">
           <span className="text-warm-white font-display font-bold text-sm">SS</span>
         </div>
-        <span className="font-display font-semibold text-lg text-off-black">StudentSphere</span>
+        <span className="font-display font-semibold text-lg text-off-black">IPS Academy Portal</span>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4 py-10">
@@ -95,11 +107,11 @@ export default function LoginPage() {
               className="hidden lg:block"
             >
               <h1 className="font-display font-bold text-4xl text-off-black leading-tight">
-                Welcome to<br />
-                <span className="text-accent-navy">StudentSphere</span>
+                IPS Academy<br />
+                <span className="text-accent-navy">Student Portal</span>
               </h1>
               <p className="text-graphite mt-4 text-sm leading-relaxed max-w-sm">
-                Academic Intelligence Platform — a unified system for administrators, teachers, and students to manage academic life with elegance and precision.
+                Institute of Engineering & Science — a unified system for administrators, faculty, and students to manage academic life with elegance and precision.
               </p>
 
               <div className="mt-8 space-y-3">
@@ -114,7 +126,7 @@ export default function LoginPage() {
                       whileHover={{ x: 4 }}
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left ${
                         isSelected
-                          ? `border-${role.role === 'admin' ? 'accent-navy' : role.role === 'teacher' ? 'accent-teal' : 'accent-orange'} bg-surface-0`
+                          ? `border-charcoal/50 bg-surface-0`
                           : 'border-border hover:border-mid-gray/50 bg-surface-0/50'
                       }`}
                     >
@@ -151,7 +163,7 @@ export default function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@studentsphere.edu"
+                      placeholder="your.email@ipsacademy.org"
                       required
                       className="w-full px-4 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray"
                     />
@@ -212,7 +224,7 @@ export default function LoginPage() {
                 {/* Mobile role selectors */}
                 <div className="mt-6 lg:hidden pt-5 border-t border-border">
                   <p className="text-xs font-semibold text-graphite uppercase tracking-wider mb-3">Quick Login</p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {roleInfo.map((role) => {
                       const Icon = role.icon;
                       return (
