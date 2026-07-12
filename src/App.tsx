@@ -15,7 +15,9 @@ import NoticeBoard from './pages/NoticeBoard';
 import AdminDashboard from './pages/AdminDashboard';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudentDashboard from './pages/StudentDashboard';
-import { LayoutDashboard, Shield, Users as UsersIcon, User, Trophy, Star, MessageCircle, Clipboard } from 'lucide-react';
+import CoordinatorDashboard from './pages/CoordinatorDashboard';
+import FacultyManagement from './pages/FacultyManagement';
+import { LayoutDashboard, Shield, Users as UsersIcon, User, Trophy, Star, MessageCircle, Clipboard, Building, BookOpenCheck } from 'lucide-react';
 import type { Student } from './data/mockData';
 
 const pageVariants = {
@@ -25,7 +27,7 @@ const pageVariants = {
 };
 
 function AppContent() {
-  const { isAuthenticated, user, logout, isAdmin, isTeacher, isStudent } = useAuth();
+  const { isAuthenticated, user, logout, isSuperAdmin, isPrincipal, isHod, isCoordinator, isFaculty, isStudent } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
@@ -48,12 +50,16 @@ function AppContent() {
     return <LoginPage />;
   }
 
+  const canManageUsers = isSuperAdmin || isPrincipal || isHod;
+
   const navTabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'admin', label: 'Admin Panel', icon: Shield },
-    { id: 'my-students', label: 'My Students', icon: UsersIcon },
+    { id: 'admin', label: 'ERP Admin', icon: Shield },
+    { id: 'faculty-mgmt', label: 'Faculty & Coordinators', icon: Building },
+    { id: 'coordinator', label: 'Coordinator Panel', icon: BookOpenCheck },
+    { id: 'my-students', label: 'My Lectures', icon: UsersIcon },
     { id: 'my-profile', label: 'My Profile', icon: User },
-    { id: 'students', label: 'Students', icon: UsersIcon },
+    { id: 'students', label: 'Student Directory (IES)', icon: UsersIcon },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
     { id: 'starboard', label: 'Star Board', icon: Star },
     { id: 'chat', label: 'Chat Room', icon: MessageCircle },
@@ -61,16 +67,18 @@ function AppContent() {
   ];
 
   const filteredNavTabs = navTabs.filter(tab => {
-    if (tab.id === 'admin') return isAdmin;
-    if (tab.id === 'my-students') return isTeacher;
+    if (tab.id === 'admin') return isSuperAdmin;
+    if (tab.id === 'faculty-mgmt') return canManageUsers;
+    if (tab.id === 'coordinator') return isCoordinator || canManageUsers;
+    if (tab.id === 'my-students') return isFaculty;
     if (tab.id === 'my-profile') return isStudent;
-    if (tab.id === 'students') return isAdmin;
+    if (tab.id === 'students') return canManageUsers || isCoordinator || isFaculty;
     return true;
   });
 
   const renderPage = () => {
     if (activeTab === 'student-profile' && selectedStudent) {
-      const canEdit = isAdmin || isTeacher;
+      const canEdit = canManageUsers || isCoordinator || isFaculty;
       return (
         <StudentProfile
           student={selectedStudent}
@@ -80,8 +88,10 @@ function AppContent() {
       );
     }
 
-    if (isAdmin && activeTab === 'admin') return <AdminDashboard />;
-    if (isTeacher && activeTab === 'my-students') return <TeacherDashboard />;
+    if (canManageUsers && activeTab === 'faculty-mgmt') return <FacultyManagement />;
+    if (isSuperAdmin && activeTab === 'admin') return <AdminDashboard />;
+    if (isFaculty && activeTab === 'my-students') return <TeacherDashboard />;
+    if ((isCoordinator || canManageUsers) && activeTab === 'coordinator') return <CoordinatorDashboard />;
     if (isStudent && activeTab === 'my-profile') return <StudentDashboard />;
 
     switch (activeTab) {
@@ -108,7 +118,7 @@ function AppContent() {
       <Header onLogout={logout} user={user} />
       <Navigation
         tabs={filteredNavTabs}
-        activeTab={activeTab === 'student-profile' ? (isTeacher ? 'my-students' : isStudent ? 'my-profile' : 'students') : activeTab}
+        activeTab={activeTab === 'student-profile' ? (isFaculty ? 'my-students' : isStudent ? 'my-profile' : 'students') : activeTab}
         onTabChange={handleTabChange}
       />
 
@@ -128,13 +138,13 @@ function AppContent() {
 
       <footer className="px-4 sm:px-8 py-4 border-t border-border bg-surface-0">
         <div className="flex items-center justify-between text-xs text-graphite">
-          <span>© 2025 StudentSphere · Academic Intelligence Platform</span>
+          <span>© 2026 IPS Academy — Institute of Engineering & Science (IES), Indore · Academic Management Portal</span>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline">{user?.name} · {user?.role}</span>
+            <span className="hidden sm:inline">{user?.name} · {user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'principal' ? 'Principal' : user?.role === 'hod' ? 'HOD' : user?.role === 'coordinator' ? 'Section Coordinator' : user?.role === 'faculty' ? 'Faculty' : 'Student'}</span>
             <span className="w-px h-3 bg-border hidden sm:inline" />
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-status-green" />
-              All systems operational
+              IES ERP — All systems operational
             </span>
           </div>
         </div>

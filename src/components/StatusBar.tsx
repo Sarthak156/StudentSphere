@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Users, Trophy, Signal } from 'lucide-react';
+import { dashboardStats } from '../data/mockData';
 
 export default function StatusBar() {
   const [time, setTime] = useState(new Date());
@@ -16,10 +17,10 @@ export default function StatusBar() {
     d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   const items = [
-    { icon: Users, label: 'Total Students', value: '2,847' },
-    { icon: Activity, label: 'Active Now', value: '1,923' },
-    { icon: Trophy, label: 'Leaderboard Updated', value: '2m ago' },
-    { icon: Signal, label: 'System', value: 'Operational' },
+    { icon: Users, label: 'IES Students Enrolled', value: dashboardStats.totalStudents.toLocaleString() },
+    { icon: Activity, label: 'Active Now', value: dashboardStats.activeUsers.toLocaleString() },
+    { icon: Trophy, label: 'MST-II Ranking', value: 'Live' },
+    { icon: Signal, label: 'IES Server', value: 'Operational' },
   ];
 
   return (
@@ -33,7 +34,7 @@ export default function StatusBar() {
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
             <item.icon size={12} className="text-warm-white/40" />
-            <span className="text-warm-white/40">{item.label}</span>
+            <span className="text-warm-white/40">{item.label}:</span>
             <span className="text-warm-white/80 font-medium">{item.value}</span>
             {i < items.length - 1 && (
               <span className="ml-4 w-px h-3 bg-warm-white/10" />
@@ -44,12 +45,12 @@ export default function StatusBar() {
       <div className="flex md:hidden items-center gap-4">
         <div className="flex items-center gap-2">
           <Users size={12} className="text-warm-white/40" />
-          <span className="text-warm-white/80 font-medium">2,847</span>
+          <span className="text-warm-white/80 font-medium">{dashboardStats.totalStudents.toLocaleString()}</span>
         </div>
         <span className="w-px h-3 bg-warm-white/10" />
         <div className="flex items-center gap-2">
           <Signal size={12} className="text-warm-white/40" />
-          <span className="text-warm-white/80 font-medium">Online</span>
+          <span className="text-warm-white/80 font-medium">IES Online</span>
         </div>
       </div>
       <div className="flex items-center gap-4">

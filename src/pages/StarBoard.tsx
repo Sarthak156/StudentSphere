@@ -53,10 +53,10 @@ export default function StarBoard() {
           </div>
           <div className="text-center md:text-left flex-1">
             <p className="text-[10px] uppercase tracking-[0.15em] font-semibold text-accent-orange mb-1">
-              #1 Overall Performer
+              #1 IES Overall Performer
             </p>
             <h3 className="font-display font-bold text-2xl text-off-black">{topStudents[0].name}</h3>
-            <p className="text-sm text-graphite mt-1">{topStudents[0].department} · Year {topStudents[0].year}</p>
+            <p className="text-sm text-graphite mt-1">{topStudents[0].branch || topStudents[0].department} · Section {topStudents[0].section} (Yr {topStudents[0].year})</p>
             <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
               {topStudents[0].achievements.map((a, i) => (
                 <span key={i} className="text-xs px-3 py-1 bg-accent-orange/8 text-accent-orange rounded-full font-medium">

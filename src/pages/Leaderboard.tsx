@@ -52,7 +52,7 @@ export default function Leaderboard() {
                 />
                 <div>
                   <h3 className="font-semibold text-off-black">{student.name}</h3>
-                  <p className="text-xs text-graphite mt-0.5">{student.department}</p>
+                  <p className="text-xs text-graphite mt-0.5 truncate max-w-[180px]">{student.branch || student.department} · Sec {student.section}</p>
                 </div>
               </div>
               <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
@@ -89,9 +89,9 @@ export default function Leaderboard() {
         {/* Header */}
         <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-surface-2 text-[10px] uppercase tracking-wider font-semibold text-graphite">
           <div className="col-span-1">Rank</div>
-          <div className="col-span-4">Student</div>
-          <div className="col-span-2">Department</div>
-          <div className="col-span-1">Year</div>
+          <div className="col-span-4">Student & Enrollment</div>
+          <div className="col-span-2">Branch</div>
+          <div className="col-span-1">Sec / Yr</div>
           <div className="col-span-1">GPA</div>
           <div className="col-span-1">Score</div>
           <div className="col-span-2 text-right">Movement</div>
@@ -128,10 +128,11 @@ export default function Leaderboard() {
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-off-black truncate">{student.name}</p>
-                  <p className="text-xs text-graphite">{student.id}</p>
+                  <p className="text-[11px] font-mono text-graphite truncate">{student.enrollmentNo}</p>
                 </div>
               </div>
-              <div className="col-span-2 text-xs text-charcoal truncate">{student.department}</div>
+              <div className="col-span-2 text-xs text-charcoal truncate">{student.branch || student.department}</div>
+              <div className="col-span-1 text-xs text-charcoal font-mono font-semibold">{student.section} / Y{student.year}</div>
               <div className="col-span-1 text-xs text-charcoal">{student.year}</div>
               <div className="col-span-1 font-display font-bold text-sm text-off-black">{student.gpa.toFixed(2)}</div>
               <div className="col-span-1">

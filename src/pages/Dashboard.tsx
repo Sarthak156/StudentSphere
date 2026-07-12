@@ -117,13 +117,13 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Department Distribution */}
+        {/* Branch Distribution */}
         <motion.div
           variants={item}
           className="bg-surface-0 rounded-xl p-6 border border-border"
         >
-          <h3 className="font-display font-semibold text-off-black">Departments</h3>
-          <p className="text-xs text-graphite mt-1 mb-6">Student distribution</p>
+          <h3 className="font-display font-semibold text-off-black">IES Engineering Branches</h3>
+          <p className="text-xs text-graphite mt-1 mb-6">Student distribution by branch</p>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={departmentData} layout="vertical" barSize={14}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E5E2DD" horizontal={false} />
@@ -174,7 +174,7 @@ export default function Dashboard() {
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-off-black truncate">{student.name}</p>
-                  <p className="text-xs text-graphite">{student.department}</p>
+                  <p className="text-xs text-graphite truncate">{student.branch || student.department} · Sec {student.section}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-display font-semibold text-off-black">{student.gpa.toFixed(2)}</p>

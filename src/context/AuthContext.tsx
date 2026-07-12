@@ -7,10 +7,37 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => { success: boolean; error?: string };
   logout: () => void;
-  canManageStudents: boolean;
-  canManageTeachers: boolean;
-  isAdmin: boolean;
-  isTeacher: boolean;
+  // Permission booleans matching exact matrix
+  canManageInstitutes: boolean;
+  canManageBranches: boolean;
+  canAddFaculty: boolean;
+  canAssignFacultyToSubjects: boolean;
+  canAssignCoordinators: boolean;
+  canAddStudents: boolean;
+  canViewAllStudents: boolean;
+  canViewSectionStudents: boolean;
+  canViewAssignedStudents: boolean;
+  canTakeAttendance: boolean;
+  canEditAttendance: boolean;
+  canReviewAttendance: boolean;
+  canUploadMarks: boolean;
+  canViewReports: boolean;
+  canViewSectionReports: boolean;
+  canViewSubjectReports: boolean;
+  canPublishNotices: boolean;
+  canPublishSectionNotices: boolean;
+  canPublishSubjectNotices: boolean;
+  canManageTimetables: boolean;
+  canViewTimetables: boolean;
+  canSubmitAssignments: boolean;
+  canResetPasswords: boolean;
+  canManageSystem: boolean;
+  // Role checks
+  isSuperAdmin: boolean;
+  isPrincipal: boolean;
+  isHod: boolean;
+  isCoordinator: boolean;
+  isFaculty: boolean;
   isStudent: boolean;
 }
 
@@ -28,11 +55,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: true };
   }, []);
 
-  const logout = useCallback(() => {
-    setUser(null);
-  }, []);
+  const logout = useCallback(() => setUser(null), []);
 
-  const role = user?.role;
+  const r = user?.role;
+
+  // Exact permission matrix from spec
+  const perms = {
+    canManageInstitutes:       r === 'superadmin',
+    canManageBranches:         r === 'superadmin',
+    canAddFaculty:             r === 'superadmin' || r === 'principal' || r === 'hod',
+    canAssignFacultyToSubjects: r === 'superadmin' || r === 'principal' || r === 'hod',
+    canAssignCoordinators:     r === 'superadmin' || r === 'principal' || r === 'hod',
+    canAddStudents:            r === 'superadmin' || r === 'principal' || r === 'hod',
+    canViewAllStudents:        r === 'superadmin' || r === 'principal' || r === 'hod',
+    canViewSectionStudents:    r === 'coordinator',
+    canViewAssignedStudents:   r === 'faculty',
+    canTakeAttendance:         r === 'faculty',
+    canEditAttendance:         r === 'faculty',
+    canReviewAttendance:       r === 'hod' || r === 'coordinator' || r === 'principal',
+    canUploadMarks:            r === 'faculty',
+    canViewReports:            r === 'superadmin' || r === 'principal' || r === 'hod',
+    canViewSectionReports:     r === 'coordinator',
+    canViewSubjectReports:     r === 'faculty',
+    canPublishNotices:         r === 'superadmin' || r === 'principal' || r === 'hod',
+    canPublishSectionNotices:  r === 'coordinator',
+    canPublishSubjectNotices:  r === 'faculty',
+    canManageTimetables:       r === 'superadmin' || r === 'principal' || r === 'hod',
+    canViewTimetables:         true, // everyone
+    canSubmitAssignments:      r === 'student',
+    canResetPasswords:         r === 'superadmin',
+    canManageSystem:           r === 'superadmin',
+  };
 
   return (
     <AuthContext.Provider
@@ -41,11 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         logout,
-        canManageStudents: role === 'admin' || role === 'teacher',
-        canManageTeachers: role === 'admin',
-        isAdmin: role === 'admin',
-        isTeacher: role === 'teacher',
-        isStudent: role === 'student',
+        ...perms,
+        isSuperAdmin:  r === 'superadmin',
+        isPrincipal:   r === 'principal',
+        isHod:         r === 'hod',
+        isCoordinator: r === 'coordinator',
+        isFaculty:     r === 'faculty',
+        isStudent:     r === 'student',
       }}
     >
       {children}

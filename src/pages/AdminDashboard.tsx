@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, UserPlus, School, GraduationCap, BookOpen, X, Trash2 } from 'lucide-react';
-import { users, students, type User, type Student } from '../data/mockData';
+import {
+  UserPlus, School, GraduationCap, X, Trash2,
+  ShieldCheck, FileText, Download, Building, CheckCircle
+} from 'lucide-react';
+import { users, students, type User, type Student, IPS_BRANCHES } from '../data/mockData';
 
-type Section = 'overview' | 'manage-teachers' | 'manage-students';
+type AdminTab = 'overview' | 'manage-faculty' | 'manage-coordinators' | 'manage-students' | 'reports';
 
 const avatars = [
   'https://images.pexels.com/photos/5308640/pexels-photo-5308640.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=150&w=150',
@@ -11,85 +14,112 @@ const avatars = [
   'https://images.pexels.com/photos/11156392/pexels-photo-11156392.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=150&w=150',
 ];
 
-// Temporary store for new items (in-memory only for demo)
 let tempTeachers: User[] = [];
 let tempStudents: Student[] = [];
 
 export default function AdminDashboard() {
-  const [section, setSection] = useState<Section>('overview');
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [showAddTeacher, setShowAddTeacher] = useState(false);
   const [showAddStudent, setShowAddStudent] = useState(false);
-  const [teacherForm, setTeacherForm] = useState({ name: '', email: '', department: '' });
-  const [studentForm, setStudentForm] = useState({
-    name: '', email: '', department: '', year: 1, section: 'A',
-    phone: '', address: '', fatherName: '', motherName: '',
+  const [reportGenerated, setReportGenerated] = useState<string | null>(null);
+
+  // Faculty Form state
+  const [teacherForm, setTeacherForm] = useState({
+    name: '', email: '', branch: 'Computer Science & Engineering (Data Science)',
+    branchCode: 'DS', sections: 'T-1, S-1', subjectCode: 'PCC-DS601', subjectName: 'Deep Learning'
   });
+
+  // Student Form state
+  const [studentForm, setStudentForm] = useState({
+    name: '', email: '', branch: 'Computer Science & Engineering (Data Science)',
+    branchCode: 'DS', year: 3, section: 'T-1', computerCode: '241199',
+    enrollmentNo: '0808DS241199', phone: '+91 98260 00000', address: 'Indore (M.P.)',
+    fatherName: '', motherName: ''
+  });
+
   const [allStudents, setAllStudents] = useState<Student[]>([...students]);
   const [allTeachers, setAllTeachers] = useState<User[]>([
-    ...users.filter(u => u.role === 'teacher'),
+    ...users.filter(u => u.role === 'faculty'),
     ...tempTeachers,
   ]);
 
-  const teachers = allTeachers;
-  const studentsList = allStudents;
+  const coordinators = users.filter(u => u.role === 'coordinator');
 
   const handleAddTeacher = () => {
-    if (!teacherForm.name || !teacherForm.email || !teacherForm.department) return;
+    if (!teacherForm.name || !teacherForm.email) return;
     const newTeacher: User = {
-      id: `USR-TCH-${String(teachers.length + 1).padStart(3, '0')}`,
+      id: `USR-TCH-${String(allTeachers.length + 1).padStart(3, '0')}`,
       name: teacherForm.name,
       email: teacherForm.email,
       password: 'teacher123',
-      role: 'teacher',
+      role: 'faculty',
       avatar: avatars[Math.floor(Math.random() * avatars.length)],
-      department: teacherForm.department,
+      branch: teacherForm.branch,
+      branchCode: teacherForm.branchCode,
+      assignedSections: teacherForm.sections.split(',').map(s => s.trim()),
+      assignedSubjects: [
+        {
+          code: teacherForm.subjectCode,
+          name: teacherForm.subjectName,
+          branch: teacherForm.branchCode,
+          semester: 6,
+          sections: teacherForm.sections.split(',').map(s => s.trim())
+        }
+      ],
       assignedStudents: [],
     };
-    const updated = [...teachers, newTeacher];
-    setAllTeachers(updated);
+    setAllTeachers(prev => [...prev, newTeacher]);
     tempTeachers.push(newTeacher);
-    setTeacherForm({ name: '', email: '', department: '' });
+    setTeacherForm({ name: '', email: '', branch: 'Computer Science & Engineering (Data Science)', branchCode: 'DS', sections: 'T-1, S-1', subjectCode: 'PCC-DS601', subjectName: 'Deep Learning' });
     setShowAddTeacher(false);
   };
 
   const handleAddStudent = () => {
-    if (!studentForm.name || !studentForm.email || !studentForm.department) return;
+    if (!studentForm.name || !studentForm.computerCode) return;
     const newStudent: Student = {
-      id: `STU-${String(studentsList.length + 1).padStart(3, '0')}`,
+      id: `STU-${studentForm.computerCode}`,
+      computerCode: studentForm.computerCode,
+      enrollmentNo: studentForm.enrollmentNo || `0808${studentForm.branchCode}${studentForm.computerCode}`,
       name: studentForm.name,
-      email: studentForm.email,
+      email: studentForm.email || `${studentForm.enrollmentNo}.ies@ipsacademy.org`,
       avatar: avatars[Math.floor(Math.random() * avatars.length)],
-      department: studentForm.department,
+      institute: 'Institute of Engineering & Science (IES)',
+      branch: studentForm.branch,
+      branchCode: studentForm.branchCode,
       year: studentForm.year,
-      semester: studentForm.year * 2 - 1,
+      semester: studentForm.year * 2,
       section: studentForm.section,
-      gpa: 0,
-      cgpa: 0,
-      rank: studentsList.length + 1,
+      rollNumber: studentForm.enrollmentNo,
+      admissionYear: 2026 - studentForm.year,
+      coordinatorName: 'Dr. Rajeshwar Singh',
+      facultyAdvisor: 'Prof. Amit Verma',
+      gpa: 3.80,
+      cgpa: 3.78,
+      rank: allStudents.length + 1,
       rankChange: 0,
       status: 'active',
-      scores: { academic: 0, social: 0, physical: 0, looks: 0, communication: 0, skills: 0 },
-      achievements: [],
+      scores: { academic: 88, social: 85, physical: 80, looks: 82, communication: 86, skills: 88 },
+      achievements: ['New IES Enrolment 2026'],
       joinDate: new Date().toISOString().split('T')[0],
       lastActive: 'Just now',
       phone: studentForm.phone,
       address: studentForm.address,
-      dob: '',
-      bloodGroup: '',
-      emergencyContact: '',
-      fatherName: studentForm.fatherName,
-      motherName: studentForm.motherName,
+      dob: '2005-01-01',
+      bloodGroup: 'O+',
+      emergencyContact: '+91 98260 11111',
+      fatherName: studentForm.fatherName || 'Shri Parent Name',
+      motherName: studentForm.motherName || 'Smt. Parent Name',
       semesterResults: [],
       assignments: [],
       attendance: [],
+      internalMarks: [],
       totalCredits: 160,
       completedCredits: 0,
       backlogs: 0,
     };
-    const updated = [...studentsList, newStudent];
-    setAllStudents(updated);
+    setAllStudents(prev => [newStudent, ...prev]);
     tempStudents.push(newStudent);
-    setStudentForm({ name: '', email: '', department: '', year: 1, section: 'A', phone: '', address: '', fatherName: '', motherName: '' });
+    setStudentForm({ name: '', email: '', branch: 'Computer Science & Engineering (Data Science)', branchCode: 'DS', year: 3, section: 'T-1', computerCode: String(Math.floor(241000 + Math.random() * 900)), enrollmentNo: '', phone: '+91 98260 00000', address: 'Indore (M.P.)', fatherName: '', motherName: '' });
     setShowAddStudent(false);
   };
 
@@ -101,218 +131,266 @@ export default function AdminDashboard() {
     setAllTeachers(prev => prev.filter(t => t.id !== id));
   };
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.05 } },
-  };
-
-  const itemAnim = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  const triggerReport = (reportName: string) => {
+    setReportGenerated(reportName);
+    setTimeout(() => setReportGenerated(null), 4000);
   };
 
   return (
-    <div className="p-4 sm:p-8 max-w-[1400px] mx-auto">
-      <div className="mb-6">
-        <h2 className="font-display font-bold text-2xl text-off-black">Admin Dashboard</h2>
-        <p className="text-sm text-graphite mt-1">Manage teachers, students, and system settings</p>
+    <div className="p-4 sm:p-8 max-w-[1400px] mx-auto space-y-6">
+      {/* Header Banner */}
+      <div className="bg-surface-0 rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-accent-navy/10 flex items-center justify-center flex-shrink-0 mt-1">
+              <ShieldCheck size={26} className="text-accent-navy" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs uppercase tracking-wider font-semibold bg-accent-navy/10 text-accent-navy px-2.5 py-0.5 rounded-full">
+                  Central Administration Portal
+                </span>
+                <span className="text-xs text-graphite font-mono">IPS Academy ERP Controller</span>
+              </div>
+              <h2 className="font-display font-bold text-2xl text-off-black mt-2">
+                Dr. Archana Sharma (Principal / Admin)
+              </h2>
+              <p className="text-xs text-graphite mt-1">
+                Managing: <span className="font-semibold text-charcoal">Institute of Engineering & Science (IES)</span> + 6 Sister Institutes
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 bg-surface-2 p-4 rounded-xl border border-border/60 self-start md:self-auto flex-wrap">
+            <div>
+              <p className="text-[11px] uppercase font-semibold text-graphite">Total Enrolled</p>
+              <p className="font-display font-bold text-2xl text-off-black mt-0.5">3,420</p>
+            </div>
+            <div className="w-px h-10 bg-border" />
+            <div>
+              <p className="text-[11px] uppercase font-semibold text-graphite">Branches</p>
+              <p className="font-display font-bold text-2xl text-accent-teal mt-0.5">{IPS_BRANCHES.length}</p>
+            </div>
+            <div className="w-px h-10 bg-border" />
+            <div>
+              <p className="text-[11px] uppercase font-semibold text-graphite">Faculty & Staff</p>
+              <p className="font-display font-bold text-2xl text-accent-navy mt-0.5">{allTeachers.length + coordinators.length + 180}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Quick Stats */}
-      <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* Admin Navigation Tabs */}
+      <div className="flex gap-2 bg-surface-2 p-1 rounded-xl w-fit overflow-x-auto">
         {[
-          { label: 'Total Teachers', value: teachers.length, icon: School, color: 'bg-accent-navy/10 text-accent-navy' },
-          { label: 'Total Students', value: studentsList.length, icon: GraduationCap, color: 'bg-accent-teal/10 text-accent-teal' },
-          { label: 'Active Students', value: studentsList.filter(s => s.status === 'active').length, icon: Users, color: 'bg-status-green/10 text-status-green' },
-          { label: 'Departments', value: new Set(studentsList.map(s => s.department)).size, icon: BookOpen, color: 'bg-accent-orange/10 text-accent-orange' },
-        ].map((stat, i) => (
-          <motion.div key={i} variants={itemAnim} className="bg-surface-0 rounded-xl border border-border p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-graphite uppercase tracking-wider font-semibold">{stat.label}</p>
-              <div className={`w-9 h-9 rounded-lg ${stat.color} flex items-center justify-center`}>
-                <stat.icon size={16} />
-              </div>
-            </div>
-            <p className="font-display font-bold text-2xl text-off-black mt-2">{stat.value}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Section Tabs */}
-      <div className="flex gap-2 mb-6 bg-surface-2 p-1 rounded-xl w-fit overflow-x-auto">
-        {([
-          { id: 'overview' as Section, label: 'Overview', icon: Users },
-          { id: 'manage-teachers' as Section, label: 'Manage Teachers', icon: School },
-          { id: 'manage-students' as Section, label: 'Manage Students', icon: GraduationCap },
-        ]).map((tab) => {
-          const isActive = section === tab.id;
+          { id: 'overview' as AdminTab, label: 'Institutes & Branch Overview', icon: Building },
+          { id: 'manage-faculty' as AdminTab, label: `Faculty Allocation (${allTeachers.length})`, icon: School },
+          { id: 'manage-coordinators' as AdminTab, label: `Section Coordinators (${coordinators.length})`, icon: ShieldCheck },
+          { id: 'manage-students' as AdminTab, label: `Student Directory (${allStudents.length})`, icon: GraduationCap },
+          { id: 'reports' as AdminTab, label: 'ERP Reports & Exports', icon: FileText },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
-              onClick={() => setSection(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
-                isActive ? 'bg-surface-0 text-off-black shadow-sm' : 'text-graphite hover:text-charcoal'
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-xs font-medium rounded-lg whitespace-nowrap transition-all ${
+                isActive ? 'bg-surface-0 text-off-black shadow-sm font-semibold' : 'text-graphite hover:text-charcoal'
               }`}
             >
-              <Icon size={14} />
+              <Icon size={15} />
               <span>{tab.label}</span>
             </button>
           );
         })}
       </div>
 
-      {section === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-surface-0 rounded-xl border border-border p-6">
-            <h3 className="font-display font-semibold text-off-black mb-4">Recent Teachers</h3>
-            <div className="space-y-3">
-              {teachers.slice(0, 4).map((t) => (
-                <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-2 transition-colors">
-                  <div className="w-9 h-9 rounded-lg bg-accent-navy/10 flex items-center justify-center">
-                    <span className="text-sm font-bold text-accent-navy">{t.name.charAt(0)}</span>
+      {/* Tab 1: Overview */}
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Sister Institutes under IPS Academy */}
+            <div className="bg-surface-0 rounded-2xl border border-border p-6 space-y-4">
+              <h3 className="font-display font-semibold text-lg text-off-black">IPS Academy Institute Ecosystem</h3>
+              <p className="text-xs text-graphite">Centralized multi-institute structure supported by this architecture</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { name: 'Institute of Engineering & Science (IES)', code: '0808', status: 'Active (Current ERP)', students: '3,420 Enrolled', primary: true },
+                  { name: 'Institute of Management Research & Tech', code: '0801', status: 'Sister Institute', students: '1,200 Enrolled' },
+                  { name: 'Institute of Pharmacy', code: '0804', status: 'Sister Institute', students: '650 Enrolled' },
+                  { name: 'Institute of Architecture', code: '0812', status: 'Sister Institute', students: '420 Enrolled' },
+                  { name: 'Institute of Law', code: '0818', status: 'Sister Institute', students: '580 Enrolled' },
+                  { name: 'Institute of Hotel Management', code: '0822', status: 'Sister Institute', students: '310 Enrolled' },
+                ].map((inst) => (
+                  <div key={inst.code} className={`p-4 rounded-xl border transition-all ${inst.primary ? 'bg-accent-navy/5 border-accent-navy/30 ring-1 ring-accent-navy/10' : 'bg-surface-2/60 border-border/70'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-mono font-bold bg-surface-0 px-2 py-0.5 rounded border border-border">
+                        Code: {inst.code}
+                      </span>
+                      <span className={`text-[10px] font-bold ${inst.primary ? 'text-accent-navy' : 'text-graphite'}`}>
+                        {inst.status}
+                      </span>
+                    </div>
+                    <h4 className="font-semibold text-sm text-off-black mt-1.5">{inst.name}</h4>
+                    <p className="text-xs text-graphite mt-1">{inst.students}</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-off-black">{t.name}</p>
-                    <p className="text-xs text-graphite">{t.department} · {t.assignedStudents?.length || 0} students</p>
+                ))}
+              </div>
+            </div>
+
+            {/* Branch Distribution inside IES */}
+            <div className="bg-surface-0 rounded-2xl border border-border p-6 space-y-4">
+              <h3 className="font-display font-semibold text-lg text-off-black">IES Engineering Branch Distribution</h3>
+              <div className="space-y-3">
+                {IPS_BRANCHES.slice(0, 8).map((b, i) => (
+                  <div key={b.code} className="flex items-center justify-between p-3 rounded-xl bg-surface-2 border border-border/60 text-xs">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-8 font-bold font-mono bg-surface-0 py-1 text-center rounded text-charcoal border border-border flex-shrink-0">
+                        {b.code}
+                      </span>
+                      <span className="font-semibold text-off-black truncate">{b.name}</span>
+                    </div>
+                    <span className="font-mono text-charcoal bg-surface-0 px-3 py-1 rounded border border-border">
+                      {[480, 360, 340, 310, 280, 420, 290, 240][i % 8]} Students
+                    </span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-          <div className="bg-surface-0 rounded-xl border border-border p-6">
-            <h3 className="font-display font-semibold text-off-black mb-4">Department Distribution</h3>
-            <div className="space-y-3">
-              {Object.entries(
-                studentsList.reduce((acc: Record<string, number>, s) => {
-                  acc[s.department] = (acc[s.department] || 0) + 1;
-                  return acc;
-                }, {})
-              ).sort((a, b) => b[1] - a[1]).map(([dept, count], i) => (
-                <div key={dept} className="flex items-center gap-3">
-                  <span className="text-xs text-graphite w-2 text-right">{i + 1}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-charcoal">{dept}</span>
-                      <span className="text-xs text-graphite">{count}</span>
-                    </div>
-                    <div className="h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-accent-navy rounded-full"
-                        style={{ width: `${(count / Math.max(...Object.values(studentsList.reduce((acc, s) => { acc[s.department] = (acc[s.department] || 0) + 1; return acc; }, {} as Record<string, number>)))) * 100}%` }}
-                      />
-                    </div>
-                  </div>
+
+          {/* Right Column: Quick Stats & System Status */}
+          <div className="space-y-6">
+            <div className="bg-surface-0 rounded-2xl border border-border p-6 space-y-4">
+              <h3 className="font-display font-semibold text-off-black">ERP Server & Database Health</h3>
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between p-3 bg-surface-2 rounded-xl">
+                  <span className="text-graphite">Database Latency</span>
+                  <span className="font-mono font-bold text-status-green">14 ms (Optimized)</span>
                 </div>
-              ))}
+                <div className="flex justify-between p-3 bg-surface-2 rounded-xl">
+                  <span className="text-graphite">Daily Active Sessions</span>
+                  <span className="font-mono font-bold text-charcoal">2,840 users</span>
+                </div>
+                <div className="flex justify-between p-3 bg-surface-2 rounded-xl">
+                  <span className="text-graphite">Attendance Sync Rate</span>
+                  <span className="font-mono font-bold text-accent-teal">99.8% Live</span>
+                </div>
+                <div className="flex justify-between p-3 bg-surface-2 rounded-xl">
+                  <span className="text-graphite">Examination Portal Lock</span>
+                  <span className="font-mono font-bold text-status-amber">Unlocks April 25</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {section === 'manage-teachers' && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-graphite">{teachers.length} teachers registered</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+      {/* Tab 2: Manage Faculty */}
+      {activeTab === 'manage-faculty' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-display font-semibold text-lg text-off-black">Faculty & Subject Allocation Register</h3>
+              <p className="text-xs text-graphite mt-0.5">Hierarchy: Faculty → Subject → Branch → Semester → Sections</p>
+            </div>
+            <button
               onClick={() => setShowAddTeacher(true)}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-medium bg-off-black text-warm-white rounded-xl hover:bg-charcoal transition-colors"
+              className="px-4 py-2.5 bg-off-black text-warm-white text-xs font-semibold rounded-xl hover:bg-charcoal transition-colors flex items-center gap-2 self-start sm:self-auto shadow-sm"
             >
-              <UserPlus size={14} />
-              <span>Add Teacher</span>
-            </motion.button>
+              <UserPlus size={15} />
+              <span>Allocate New Faculty</span>
+            </button>
           </div>
 
-          {/* Teacher List */}
-          <div className="bg-surface-0 rounded-xl border border-border overflow-hidden">
-            <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-surface-2 text-[10px] uppercase tracking-wider font-semibold text-graphite">
-              <div className="col-span-4">Name</div>
-              <div className="col-span-3">Department</div>
-              <div className="col-span-2">Students</div>
-              <div className="col-span-2">Email</div>
-              <div className="col-span-1"></div>
+          <div className="bg-surface-0 rounded-2xl border border-border overflow-hidden shadow-sm">
+            <div className="grid grid-cols-12 gap-2 px-6 py-3.5 bg-surface-2 text-[10px] uppercase font-bold text-graphite tracking-wider border-b border-border">
+              <div className="col-span-4">Faculty Member & Email</div>
+              <div className="col-span-3">Assigned Branch & Sections</div>
+              <div className="col-span-4">Allocated Subject & Code</div>
+              <div className="col-span-1 text-right">Action</div>
             </div>
-            <div className="divide-y divide-border-light">
-              {teachers.map((t) => (
-                <div key={t.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center hover:bg-surface-2 transition-colors">
-                  <div className="col-span-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-accent-navy/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-accent-navy">{t.name.charAt(0)}</span>
+            <div className="divide-y divide-border-light max-h-[500px] overflow-y-auto">
+              {allTeachers.map((t) => (
+                <div key={t.id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center hover:bg-surface-2/60 transition-colors text-xs">
+                  <div className="col-span-4 flex items-center gap-3 min-w-0">
+                    <img src={t.avatar} alt={t.name} className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-off-black truncate">{t.name}</p>
+                      <p className="text-[11px] font-mono text-graphite truncate">{t.email}</p>
                     </div>
-                    <span className="text-sm text-off-black font-medium">{t.name}</span>
                   </div>
-                  <div className="col-span-3 text-xs text-charcoal">{t.department}</div>
-                  <div className="col-span-2 text-xs text-graphite">{t.assignedStudents?.length || 0} assigned</div>
-                  <div className="col-span-2 text-xs text-graphite truncate">{t.email}</div>
-                  <div className="col-span-1">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                  <div className="col-span-3 font-mono">
+                    <p className="font-semibold text-charcoal">{t.branchCode || 'DS'} ({t.branch?.split(' ')[0]})</p>
+                    <p className="text-[11px] text-accent-navy font-bold mt-0.5">Sections: {t.assignedSections?.join(', ') || 'T-1, S-1'}</p>
+                  </div>
+                  <div className="col-span-4">
+                    {t.assignedSubjects && t.assignedSubjects.length > 0 ? (
+                      <div>
+                        <p className="font-semibold text-off-black">{t.assignedSubjects[0].name}</p>
+                        <p className="text-[11px] font-mono text-graphite">{t.assignedSubjects[0].code} · Sem {t.assignedSubjects[0].semester}</p>
+                      </div>
+                    ) : (
+                      <span className="text-graphite italic">Multiple departmental courses</span>
+                    )}
+                  </div>
+                  <div className="col-span-1 text-right">
+                    <button
                       onClick={() => handleDeleteTeacher(t.id)}
-                      className="p-1.5 rounded-lg hover:bg-status-red/10 text-graphite hover:text-status-red transition-colors"
+                      className="p-2 rounded-lg hover:bg-status-red/10 text-graphite hover:text-status-red transition-colors"
+                      title="Remove Allocation"
                     >
-                      <Trash2 size={14} />
-                    </motion.button>
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Add Teacher Modal */}
+          {/* Add Faculty Modal */}
           {showAddTeacher && (
-            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-surface-0 rounded-2xl border border-border p-6 w-full max-w-md shadow-xl"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-display font-semibold text-off-black">Add Teacher</h3>
-                  <button onClick={() => setShowAddTeacher(false)} className="p-1 rounded-lg hover:bg-surface-2 transition-colors">
-                    <X size={18} className="text-graphite" />
-                  </button>
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface-0 rounded-2xl border border-border p-6 w-full max-w-lg shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <h3 className="font-display font-bold text-lg text-off-black">Allocate Faculty to Sections</h3>
+                  <button onClick={() => setShowAddTeacher(false)} className="p-1 rounded-lg hover:bg-surface-2"><X size={18} className="text-graphite" /></button>
                 </div>
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block text-xs font-medium text-graphite mb-1.5">Full Name</label>
-                    <input
-                      value={teacherForm.name}
-                      onChange={e => setTeacherForm(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Dr. Jane Doe"
-                      className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray"
-                    />
+                    <label className="block font-medium text-graphite mb-1">Full Name</label>
+                    <input value={teacherForm.name} onChange={e => setTeacherForm(p => ({ ...p, name: e.target.value }))} placeholder="Prof. Rajesh Sharma" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-graphite mb-1.5">Email</label>
-                    <input
-                      value={teacherForm.email}
-                      onChange={e => setTeacherForm(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="j.doe@studentsphere.edu"
-                      className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray"
-                    />
+                    <label className="block font-medium text-graphite mb-1">Official Email</label>
+                    <input value={teacherForm.email} onChange={e => setTeacherForm(p => ({ ...p, email: e.target.value }))} placeholder="r.sharma@ipsacademy.org" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Branch Code</label>
+                    <select value={teacherForm.branchCode} onChange={e => setTeacherForm(p => ({ ...p, branchCode: e.target.value }))} className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg">
+                      {IPS_BRANCHES.map(b => <option key={b.code} value={b.code}>{b.shortName} ({b.code})</option>)}
+                    </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-graphite mb-1.5">Department</label>
-                    <input
-                      value={teacherForm.department}
-                      onChange={e => setTeacherForm(prev => ({ ...prev, department: e.target.value }))}
-                      placeholder="Computer Science"
-                      className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray"
-                    />
+                    <label className="block font-medium text-graphite mb-1">Assigned Sections (comma separated)</label>
+                    <input value={teacherForm.sections} onChange={e => setTeacherForm(p => ({ ...p, sections: e.target.value }))} placeholder="T-1, T-2, S-1" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg font-mono" />
                   </div>
-                  <p className="text-[10px] text-graphite/60">Default password: <span className="font-mono">teacher123</span></p>
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={handleAddTeacher}
-                    disabled={!teacherForm.name || !teacherForm.email || !teacherForm.department}
-                    className="w-full py-2.5 bg-off-black text-warm-white text-sm font-medium rounded-xl hover:bg-charcoal transition-colors disabled:opacity-30"
-                  >
-                    Add Teacher
-                  </motion.button>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Subject Code</label>
+                    <input value={teacherForm.subjectCode} onChange={e => setTeacherForm(p => ({ ...p, subjectCode: e.target.value }))} placeholder="PCC-DS601" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg font-mono" />
+                  </div>
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Subject Name</label>
+                    <input value={teacherForm.subjectName} onChange={e => setTeacherForm(p => ({ ...p, subjectName: e.target.value }))} placeholder="Deep Learning" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg" />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button onClick={handleAddTeacher} disabled={!teacherForm.name || !teacherForm.email} className="px-5 py-2.5 bg-off-black text-warm-white text-xs font-semibold rounded-xl hover:bg-charcoal disabled:opacity-50">Confirm Allocation</button>
                 </div>
               </motion.div>
             </div>
@@ -320,59 +398,93 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {section === 'manage-students' && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-graphite">{studentsList.length} students enrolled</p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+      {/* Tab 3: Manage Coordinators */}
+      {activeTab === 'manage-coordinators' && (
+        <div className="bg-surface-0 rounded-2xl border border-border p-6 space-y-4">
+          <h3 className="font-display font-semibold text-lg text-off-black">Section Coordinators Directory</h3>
+          <p className="text-xs text-graphite">Each section across all 4 undergraduate years is assigned exactly one dedicated Section Coordinator.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {[
+              { name: 'Dr. Rajeshwar Singh', branch: 'Computer Science & Engineering (Data Science)', code: 'DS', sec: 'T-1', sem: 6, email: 'r.singh@ipsacademy.org' },
+              { name: 'Dr. Neha Kulkarni', branch: 'Computer Science & Engineering (AI & ML)', code: 'AI', sec: 'F-1', sem: 8, email: 'n.kulkarni@ipsacademy.org' },
+              { name: 'Prof. Sanjay Dubey', branch: 'Fire Technology & Safety Engineering', code: 'FT', sec: 'T-1', sem: 6, email: 's.dubey@ipsacademy.org' },
+              { name: 'Dr. Manish Sharma', branch: 'Computer Science & Engineering (Core)', code: 'CS', sec: 'S-1', sem: 4, email: 'm.sharma@ipsacademy.org' },
+            ].map((c, i) => (
+              <div key={i} className="p-5 rounded-2xl bg-surface-2 border border-border/70 flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold bg-accent-navy text-white px-2 py-0.5 rounded">
+                      Section {c.sec}
+                    </span>
+                    <span className="text-xs font-semibold text-accent-navy">{c.code} · Sem {c.sem}</span>
+                  </div>
+                  <h4 className="font-display font-bold text-base text-off-black mt-2">{c.name}</h4>
+                  <p className="text-xs text-graphite mt-0.5">{c.branch}</p>
+                  <p className="text-xs font-mono text-charcoal mt-2">{c.email}</p>
+                </div>
+                <button className="px-3 py-1.5 bg-surface-0 text-charcoal text-xs font-medium rounded-lg border border-border hover:bg-off-black hover:text-warm-white transition-colors">
+                  Change Allocation
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Manage Students Directory */}
+      {activeTab === 'manage-students' && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-display font-semibold text-lg text-off-black">Master Undergraduate Register</h3>
+              <p className="text-xs text-graphite mt-0.5">Enrolment verification and record management for all B.Tech students</p>
+            </div>
+            <button
               onClick={() => setShowAddStudent(true)}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-medium bg-off-black text-warm-white rounded-xl hover:bg-charcoal transition-colors"
+              className="px-4 py-2.5 bg-off-black text-warm-white text-xs font-semibold rounded-xl hover:bg-charcoal transition-colors flex items-center gap-2 self-start sm:self-auto shadow-sm"
             >
-              <UserPlus size={14} />
-              <span>Add Student</span>
-            </motion.button>
+              <UserPlus size={15} />
+              <span>Enroll New Student</span>
+            </button>
           </div>
 
-          {/* Student List */}
-          <div className="bg-surface-0 rounded-xl border border-border overflow-hidden">
-            <div className="grid grid-cols-12 gap-2 px-5 py-3 bg-surface-2 text-[10px] uppercase tracking-wider font-semibold text-graphite">
-              <div className="col-span-4">Name</div>
-              <div className="col-span-2">ID</div>
-              <div className="col-span-2">Department</div>
-              <div className="col-span-1">Year</div>
-              <div className="col-span-1">GPA</div>
-              <div className="col-span-1">Status</div>
-              <div className="col-span-1"></div>
+          <div className="bg-surface-0 rounded-2xl border border-border overflow-hidden shadow-sm">
+            <div className="grid grid-cols-12 gap-2 px-6 py-3.5 bg-surface-2 text-[10px] uppercase font-bold text-graphite tracking-wider border-b border-border">
+              <div className="col-span-4">Student & Enrollment No</div>
+              <div className="col-span-3">Branch & Section</div>
+              <div className="col-span-2 font-mono">Computer Code</div>
+              <div className="col-span-2">GPA / Status</div>
+              <div className="col-span-1 text-right">Action</div>
             </div>
             <div className="divide-y divide-border-light max-h-[500px] overflow-y-auto">
-              {studentsList.map((s) => (
-                <div key={s.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center hover:bg-surface-2 transition-colors">
-                  <div className="col-span-4 flex items-center gap-3">
-                    <img src={s.avatar} className="w-7 h-7 rounded-lg object-cover" alt="" />
-                    <span className="text-sm text-off-black font-medium truncate">{s.name}</span>
+              {allStudents.map((s) => (
+                <div key={s.id} className="grid grid-cols-12 gap-2 px-6 py-4 items-center hover:bg-surface-2/60 transition-colors text-xs">
+                  <div className="col-span-4 flex items-center gap-3 min-w-0">
+                    <img src={s.avatar} alt={s.name} className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-off-black truncate">{s.name}</p>
+                      <p className="text-[11px] font-mono text-graphite truncate">{s.enrollmentNo}</p>
+                    </div>
                   </div>
-                  <div className="col-span-2 text-xs text-graphite font-mono">{s.id}</div>
-                  <div className="col-span-2 text-xs text-charcoal truncate">{s.department}</div>
-                  <div className="col-span-1 text-xs text-charcoal">{s.year}</div>
-                  <div className="col-span-1 text-xs font-display font-bold text-off-black">{s.gpa.toFixed(2)}</div>
-                  <div className="col-span-1">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                      s.status === 'active' ? 'bg-status-green/10 text-status-green' :
-                      s.status === 'on-leave' ? 'bg-status-amber/10 text-status-amber' :
-                      'bg-status-red/10 text-status-red'
-                    }`}>{s.status}</span>
+                  <div className="col-span-3">
+                    <p className="font-semibold text-charcoal truncate">{s.branch || s.department}</p>
+                    <p className="text-[11px] font-mono text-accent-navy font-bold mt-0.5">Section {s.section} · Sem {s.semester}</p>
                   </div>
-                  <div className="col-span-1">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                  <div className="col-span-2 font-mono font-bold text-charcoal">{s.computerCode}</div>
+                  <div className="col-span-2 flex items-center gap-2">
+                    <span className="font-display font-bold text-off-black">{s.gpa.toFixed(2)}</span>
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-status-green/10 text-status-green">
+                      {s.status}
+                    </span>
+                  </div>
+                  <div className="col-span-1 text-right">
+                    <button
                       onClick={() => handleDeleteStudent(s.id)}
-                      className="p-1.5 rounded-lg hover:bg-status-red/10 text-graphite hover:text-status-red transition-colors"
+                      className="p-2 rounded-lg hover:bg-status-red/10 text-graphite hover:text-status-red transition-colors"
+                      title="De-enroll Student"
                     >
-                      <Trash2 size={14} />
-                    </motion.button>
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -381,81 +493,101 @@ export default function AdminDashboard() {
 
           {/* Add Student Modal */}
           {showAddStudent && (
-            <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-surface-0 rounded-2xl border border-border p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-display font-semibold text-off-black">Add Student</h3>
-                  <button onClick={() => setShowAddStudent(false)} className="p-1 rounded-lg hover:bg-surface-2 transition-colors">
-                    <X size={18} className="text-graphite" />
-                  </button>
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-surface-0 rounded-2xl border border-border p-6 w-full max-w-lg shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-border pb-3">
+                  <h3 className="font-display font-bold text-lg text-off-black">Enroll New B.Tech Student</h3>
+                  <button onClick={() => setShowAddStudent(false)} className="p-1 rounded-lg hover:bg-surface-2"><X size={18} className="text-graphite" /></button>
                 </div>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Full Name</label>
-                      <input value={studentForm.name} onChange={e => setStudentForm(p => ({ ...p, name: e.target.value }))} placeholder="John Doe" className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Email</label>
-                      <input value={studentForm.email} onChange={e => setStudentForm(p => ({ ...p, email: e.target.value }))} placeholder="j.doe@..." className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Department</label>
-                      <input value={studentForm.department} onChange={e => setStudentForm(p => ({ ...p, department: e.target.value }))} placeholder="Computer Science" className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Year</label>
-                      <select value={studentForm.year} onChange={e => setStudentForm(p => ({ ...p, year: Number(e.target.value) }))} className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all">
-                        {[1, 2, 3, 4].map(y => <option key={y} value={y}>{y}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Phone</label>
-                      <input value={studentForm.phone} onChange={e => setStudentForm(p => ({ ...p, phone: e.target.value }))} placeholder="+1 (555) 000-0000" className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Section</label>
-                      <select value={studentForm.section} onChange={e => setStudentForm(p => ({ ...p, section: e.target.value }))} className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all">
-                        {['A', 'B', 'C'].map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Full Name</label>
+                    <input value={studentForm.name} onChange={e => setStudentForm(p => ({ ...p, name: e.target.value }))} placeholder="Siddharth Mehta" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-graphite mb-1.5">Address</label>
-                    <input value={studentForm.address} onChange={e => setStudentForm(p => ({ ...p, address: e.target.value }))} placeholder="123 Campus Drive" className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
+                    <label className="block font-medium text-graphite mb-1">Computer Code</label>
+                    <input value={studentForm.computerCode} onChange={e => setStudentForm(p => ({ ...p, computerCode: e.target.value }))} placeholder="241199" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg font-mono" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Father's Name</label>
-                      <input value={studentForm.fatherName} onChange={e => setStudentForm(p => ({ ...p, fatherName: e.target.value }))} placeholder="Father name" className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-graphite mb-1.5">Mother's Name</label>
-                      <input value={studentForm.motherName} onChange={e => setStudentForm(p => ({ ...p, motherName: e.target.value }))} placeholder="Mother name" className="w-full px-3 py-2.5 text-sm bg-surface-2 border border-border rounded-lg focus:outline-none focus:border-charcoal/40 focus:bg-surface-0 transition-all placeholder:text-mid-gray" />
-                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Enrollment No (Format: 0808DS241199)</label>
+                    <input value={studentForm.enrollmentNo} onChange={e => setStudentForm(p => ({ ...p, enrollmentNo: e.target.value }))} placeholder="0808DS241199" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg font-mono" />
                   </div>
-                  <p className="text-[10px] text-graphite/60">Default password: <span className="font-mono">student123</span></p>
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={handleAddStudent}
-                    disabled={!studentForm.name || !studentForm.email || !studentForm.department}
-                    className="w-full py-2.5 bg-off-black text-warm-white text-sm font-medium rounded-xl hover:bg-charcoal transition-colors disabled:opacity-30"
-                  >
-                    Add Student
-                  </motion.button>
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Official IPS Email</label>
+                    <input value={studentForm.email} onChange={e => setStudentForm(p => ({ ...p, email: e.target.value }))} placeholder="0808DS241199.ies@ipsacademy.org" className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg font-mono" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Branch Code</label>
+                    <select value={studentForm.branchCode} onChange={e => setStudentForm(p => ({ ...p, branchCode: e.target.value }))} className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg">
+                      {IPS_BRANCHES.map(b => <option key={b.code} value={b.code}>{b.code}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Year</label>
+                    <select value={studentForm.year} onChange={e => setStudentForm(p => ({ ...p, year: Number(e.target.value) }))} className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg">
+                      {[1, 2, 3, 4].map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-medium text-graphite mb-1">Section</label>
+                    <select value={studentForm.section} onChange={e => setStudentForm(p => ({ ...p, section: e.target.value }))} className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg font-mono font-bold">
+                      {['DS-1', 'DS-2', 'S-1', 'S-2', 'T-1', 'T-2', 'F-1'].map(sec => <option key={sec} value={sec}>{sec}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-3">
+                  <button onClick={handleAddStudent} disabled={!studentForm.name || !studentForm.computerCode} className="px-5 py-2.5 bg-off-black text-warm-white text-xs font-semibold rounded-xl hover:bg-charcoal disabled:opacity-50">Save Enrolment Record</button>
                 </div>
               </motion.div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab 5: Reports */}
+      {activeTab === 'reports' && (
+        <div className="bg-surface-0 rounded-2xl border border-border p-6 space-y-6">
+          <div>
+            <h3 className="font-display font-semibold text-lg text-off-black">IES Automated ERP Report Generator</h3>
+            <p className="text-xs text-graphite mt-0.5">Generate compliant academic sheets and attendance audit reports in CSV / PDF format</p>
+          </div>
+
+          {reportGenerated && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-status-green/10 border border-status-green/20 rounded-xl flex items-center gap-3">
+              <CheckCircle size={20} className="text-status-green flex-shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-status-green">Generated Report Successfully!</p>
+                <p className="text-xs text-charcoal mt-0.5 font-mono">File: {reportGenerated}_IES_2026.csv (Prepared for download)</p>
+              </div>
+            </motion.div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { title: 'Even Semester Attendance Defaulter Report (<75%)', desc: 'Lists all undergraduate students across IES sections currently falling below RGPV attendance requirements.' },
+              { title: 'Mid-Term Examination (MST-I & II) Consolidated Score Sheet', desc: 'Complete theory sessional marks aggregated by branch and section.' },
+              { title: 'Faculty Workload & Lecture Allocation Report', desc: 'Summary of theory subjects and lab sessions assigned to teaching staff.' },
+              { title: 'Branch Enrollment & Placement Eligibility Audit', desc: 'List of students meeting CGPA >= 6.5 criteria with no active backlogs for campus recruitment.' },
+            ].map((rep, idx) => (
+              <div key={idx} className="p-5 rounded-2xl bg-surface-2 border border-border/70 flex flex-col justify-between space-y-4">
+                <div>
+                  <h4 className="font-semibold text-sm text-off-black">{rep.title}</h4>
+                  <p className="text-xs text-graphite mt-1 leading-relaxed">{rep.desc}</p>
+                </div>
+                <button
+                  onClick={() => triggerReport(rep.title.split(' ')[0] + '_Report')}
+                  className="px-4 py-2 bg-surface-0 border border-border hover:bg-off-black hover:text-warm-white text-xs font-semibold rounded-xl transition-all self-start flex items-center gap-2"
+                >
+                  <Download size={14} />
+                  <span>Generate & Export Report</span>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
